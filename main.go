@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -34,6 +35,8 @@ func main() {
 	db.AutoMigrate(&Task{})
 
 	e := echo.New()
+
+	e.Use(middleware.CORS())
 
 	e.GET("/tasks", func(c echo.Context) error {
 		var tasks []Task
