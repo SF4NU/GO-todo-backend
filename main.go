@@ -44,11 +44,27 @@ func main() {
 	e.POST("/tasks", func(c echo.Context) error {
 		var task Task
 		if err := c.Bind(&task); err != nil {
-				return err
+			return err
 		}
 		db.Create(&task)
 		return c.JSON(http.StatusCreated, task)
-})
+	})
+
+	e.PUT("/tasks/:id", func(c echo.Context) error {
+		id := c.Param("id")
+
+		var task Task
+		if err := db.First(&task, id).Error; err != nil {
+			return c.JSON(http.StatusNotFound, map[string]string{"error": "Task not found"})
+		}
+
+		task.Completed = true
+		if err := db.Save(&task).Error; err != nil {
+			return err
+		}
+
+		return c.JSON(http.StatusOK, task)
+	})
 
 	// e.GET("/", func(c echo.Context) error {
 	// 	return c.String(http.StatusOK, "Hello, World!")
