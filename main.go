@@ -25,10 +25,7 @@ func main() {
 	}
 
 	dbKey := os.Getenv("DB_KEY")
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "3000"
-	}
+
 	dsn := fmt.Sprintf("postgres://ryfljouh:%s@dumbo.db.elephantsql.com/ryfljouh", dbKey)
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
@@ -104,5 +101,5 @@ func main() {
 		return c.String(http.StatusAccepted, "task deleted")
 	})
 
-	e.Logger.Fatal(e.Start("0.0.0.0:" + port))
+	e.Logger.Fatal(e.Start(":3000"))
 }
