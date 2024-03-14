@@ -2,11 +2,13 @@ package main
 
 import (
 	"net/http"
-
+	"os"
+	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"fmt"
 )
 
 type Task struct {
@@ -17,7 +19,13 @@ type Task struct {
 }
 
 func main() {
-	dsn := "host=localhost user=postgres password=123 dbname=todo_db port=5432 sslmode=disable"
+	if err := godotenv.Load(); err != nil {
+		panic("Error loading .env file")
+	}
+
+	dbKey := os.Getenv("DB_KEY")
+
+	dsn := fmt.Sprintf("postgres://ryfljouh:%s@dumbo.db.elephantsql.com/ryfljouh", dbKey)
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
 		panic("db not connected")
