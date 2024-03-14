@@ -9,20 +9,11 @@ import (
 	"gorm.io/gorm"
 )
 
-// func getUser(c echo.Context) error {
-// 	id := c.Param("id")
-// 	return c.String(http.StatusOK, id)
-// }
-
-// type User struct {
-// 	Name string `json:"name"`
-// 	Email string `json:"email"`
-// }
-
 type Task struct {
 	ID          uint   `gorm:"primaryKey"`
 	Description string `json:"description"`
 	Completed   bool   `json:"completed"`
+	Deadline    string `json:"deadline"`
 }
 
 func main() {
@@ -49,6 +40,7 @@ func main() {
 		if err := c.Bind(&task); err != nil {
 			return err
 		}
+
 		db.Create(&task)
 		return c.JSON(http.StatusCreated, task)
 	})
@@ -58,10 +50,24 @@ func main() {
 
 		var task Task
 		if err := db.First(&task, id).Error; err != nil {
-			return c.JSON(http.StatusNotFound, map[string]string{"error": "Task not found"})
+			return c.String(http.StatusNotFound, "task not found")
 		}
 
-		task.Completed = true
+		var updatedTask Task
+		if err := c.Bind(&updatedTask); err != nil {
+			return err
+		}
+		if updatedTask.Description != "" {
+			task.Description = updatedTask.Description
+		}
+
+		if updatedTask.Completed != task.Completed {
+			task.Completed = updatedTask.Completed
+		}
+		if updatedTask.Deadline != task.Deadline {
+			task.Deadline = updatedTask.Deadline
+		}
+
 		if err := db.Save(&task).Error; err != nil {
 			return err
 		}
@@ -69,23 +75,18 @@ func main() {
 		return c.JSON(http.StatusOK, task)
 	})
 
-	// e.GET("/", func(c echo.Context) error {
-	// 	return c.String(http.StatusOK, "Hello, World!")
-	// })
+	e.DELETE("/tasks/:id", func(c echo.Context) error {
+		id := c.Param("id")
 
-	// e.POST("/users", func(c echo.Context) error {
-	// 	u := new(User)
-	// 	if err := c.Bind(u); err != nil {
-	// 		return err
-	// 	}
+		var task Task
+		if err := db.First(&task, id).Error; err != nil {
+			return c.String(http.StatusNotFound, "task not found")
+		}
 
-	// 	fmt.Println(u.Email)
-	// 	return c.JSON(http.StatusCreated, u)
-	// })
+		db.Delete(&Task{}, id)
 
-	// e.GET("/users/:id", getUser)
-	// e.PUT("/users/:id", updateUser)
-	// e.DELETE("/users/:id", deleteUser)
+		return c.String(http.StatusAccepted, "task deleted")
+	})
 
 	e.Logger.Fatal(e.Start(":1323"))
 }
