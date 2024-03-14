@@ -38,6 +38,10 @@ func main() {
 
 	e.Use(middleware.CORS())
 
+	e.GET("/", func(c echo.Context) error {
+		return c.String(http.StatusOK, "Todo-api")
+	})
+
 	e.GET("/tasks", func(c echo.Context) error {
 		var tasks []Task
 		db.Find(&tasks)
