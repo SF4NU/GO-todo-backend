@@ -1,14 +1,15 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 	"os"
+
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	"fmt"
 )
 
 type Task struct {
@@ -24,7 +25,7 @@ func main() {
 	}
 
 	dbKey := os.Getenv("DB_KEY")
-
+	port := os.Getenv("PORT")
 	dsn := fmt.Sprintf("postgres://ryfljouh:%s@dumbo.db.elephantsql.com/ryfljouh", dbKey)
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
@@ -96,5 +97,5 @@ func main() {
 		return c.String(http.StatusAccepted, "task deleted")
 	})
 
-	e.Logger.Fatal(e.Start(":1323"))
+	e.Logger.Fatal(e.Start(":" + port))
 }
